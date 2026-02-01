@@ -209,8 +209,8 @@ export default function MyVoiceClone() {
   };
 
   const handleCloneVoice = async () => {
-    if (!recordedBlob || isCloning || !voiceName.trim()) {
-      if (!voiceName.trim()) setError('請先輸入聲音名稱');
+    if (!recordedBlob || isCloning) {
+      if (!recordedBlob) setError('請先錄製聲音');
       return;
     }
     setIsCloning(true);
@@ -315,14 +315,7 @@ export default function MyVoiceClone() {
                 </div>
               </div>
 
-              {/* Hidden Voice Name Section - Automatic Naming */}
-              <div className="hidden">
-                <input
-                  type="text"
-                  value={voiceName}
-                  onChange={(e) => { setVoiceName(e.target.value); setError(null); }}
-                />
-              </div>
+              {/* Voice name is managed automatically in state */}
 
               <div className="flex flex-col items-center gap-6 py-4">
                 <div className="relative group">
