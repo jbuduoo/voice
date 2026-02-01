@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Loader2, Play, Download, Trash2, Volume2, AlertCircle,
   Mic, Square, UserPlus, CheckCircle2, ChevronRight,
-  Info, Settings2, FileText, Sparkles, Wand2, Music
+  Info, Settings2, FileText, Sparkles, Wand2, Music, RefreshCw
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -65,6 +65,16 @@ export default function MyVoiceClone() {
   const characterLimit = 500;
   const isOverLimit = text.length > characterLimit;
 
+  // Random Name Generator
+  const generateRandomName = () => {
+    const prefixes = ['神秘', '柔和', '磁性', '活力', '深沉', '清脆', '溫暖', '酷炫'];
+    const suffixes = ['之聲', '克隆', '語音', '音色', '播報員', '演講家'];
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    const randomNumber = Math.floor(Math.random() * 1000);
+    return `${randomPrefix}${randomSuffix} ${randomNumber}`;
+  };
+
   // Fetch Voices on Mount
   useEffect(() => {
     const fetchVoices = async () => {
@@ -82,6 +92,10 @@ export default function MyVoiceClone() {
       }
     };
     fetchVoices();
+    // Initialize random name
+    if (!voiceName) {
+      setVoiceName(generateRandomName());
+    }
   }, [selectedVoice]);
 
   // Cleanup URLs
@@ -216,13 +230,13 @@ export default function MyVoiceClone() {
       const newVoice = { id: data.voice_id, name: `${data.name} (我的克隆)` };
       setVoices((prev) => [newVoice, ...prev]);
       setSelectedVoice(newVoice.id);
-      setCloneSuccess('語音克隆成功！正在前往生成頁面...');
+      setCloneSuccess(`語音克隆成功！名稱為「${data.name}」，正在前往生成頁面...`);
       setRecordedBlob(null);
       if (recordedUrl) URL.revokeObjectURL(recordedUrl);
       setRecordedUrl(null);
-      setVoiceName('');
+      setVoiceName(generateRandomName());
 
-      setTimeout(() => setCurrentStep(2), 1500);
+      setTimeout(() => setCurrentStep(2), 2000);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -238,7 +252,7 @@ export default function MyVoiceClone() {
 
   // Step Progress Indicator (Updated to 2 Steps)
   const StepIndicator = () => (
-    <div className="flex items-center justify-between mb-10 px-2 max-w-sm mx-auto">
+    <div className="flex items-center justify-between mb-6 px-2 max-w-sm mx-auto">
       {[1, 2].map((num) => (
         <React.Fragment key={num}>
           <div className="flex flex-col items-center gap-2">
@@ -279,39 +293,47 @@ export default function MyVoiceClone() {
 
         <StepIndicator />
 
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
           {/* STEP 1: RECORDING */}
           {currentStep === 1 && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <div className="space-y-3">
+            <div className="space-y-4 animate-in fade-in duration-300">
+              <div className="space-y-2">
                 <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                   <span className="w-6 h-6 bg-indigo-50 text-indigo-600 rounded-md flex items-center justify-center text-xs">1</span>
                   錄製您的原始音色
                 </h2>
 
-                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2">
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
                     <FileText size={12} className="text-indigo-500" />
                     建議讀稿 (維持一分鐘錄音最佳)
                   </div>
                   <div className="bg-white p-3 rounded-xl border border-slate-200 text-slate-600 leading-relaxed text-sm antialiased italic">
-                    「大家好！很高興今天見到你們。讓我們一起探索語言的魔力，享受學習英語的美好時光。準備好了嗎？<br /><br />
-                    現在我正在讀一段測試稿，目的是為了讓 AI 學習我的音色、語氣和說話的節奏。在接下來的一分鐘內，我會保持自然、平穩的語速。錄音時，建議在安靜的環境下進行，避免背景雜音，這樣克隆出來的效果才會最接近原聲。謝謝大家。」
+                    「早安！今天的天氣非常舒適。我正在記錄一段簡短的語音，幫助人工智慧學習我的說話方式。在錄音時，我會保持自然且清晰的發音，並注意語句之間的適度停頓。希望透過這段樣本，能讓系統完整捕捉到我聲音中溫暖且獨特的特質。」
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="space-y-2">
+              <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">新聲音名稱</label>
-                  <input
-                    type="text"
-                    placeholder="例如：我的專屬男聲"
-                    className="w-full p-3 bg-white border border-[#CBD5E1] rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 shadow-sm transition-all outline-none text-sm"
-                    value={voiceName}
-                    onChange={(e) => { setVoiceName(e.target.value); setError(null); }}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="例如：我的專屬男聲"
+                      className="w-full p-3 pr-10 bg-white border border-[#CBD5E1] rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 shadow-sm transition-all outline-none text-sm"
+                      value={voiceName}
+                      onChange={(e) => { setVoiceName(e.target.value); setError(null); }}
+                    />
+                    <button
+                      onClick={() => setVoiceName(generateRandomName())}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
+                      title="產生隨機名稱"
+                    >
+                      <RefreshCw size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -362,7 +384,7 @@ export default function MyVoiceClone() {
                 </div>
               )}
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-2">
                 <button
                   onClick={() => setCurrentStep(2)}
                   className="px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-500 border border-slate-200 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-sm"
@@ -375,15 +397,15 @@ export default function MyVoiceClone() {
 
           {/* STEP 2: GENERATION (Simplified) */}
           {currentStep === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="space-y-4 animate-in fade-in duration-300">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <span className="w-6 h-6 bg-indigo-50 text-indigo-600 rounded-md flex items-center justify-center text-xs">2</span>
                 選擇角色並生成語音
               </h2>
 
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {/* Voice Selection moved here */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">發聲者選擇</label>
                   <div className="relative">
                     <select
@@ -397,7 +419,7 @@ export default function MyVoiceClone() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex justify-between items-center px-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">輸入預轉出的文本</label>
                     <span className={cn(
