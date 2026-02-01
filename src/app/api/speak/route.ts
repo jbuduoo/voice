@@ -44,6 +44,12 @@ export async function POST(req: NextRequest) {
         const apiKey = process.env.ELEVENLABS_API_KEY;
         const voiceId = requestedVoiceId || process.env.VOICE_ID;
 
+        // Debugging logs
+        console.log('Speak API called');
+        console.log('API Key Presence:', !!apiKey);
+        if (apiKey) console.log('API Key Length:', apiKey.length);
+        console.log('Voice ID:', voiceId);
+
         if (!apiKey || !voiceId) {
             console.error('Missing ElevenLabs API Key or Voice ID');
             return NextResponse.json({ error: '伺服器配置錯誤或未提供聲音 ID' }, { status: 500 });
@@ -71,12 +77,20 @@ export async function POST(req: NextRequest) {
         );
 
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('ElevenLabs API error:', errorData);
-            return NextResponse.json(
-                { error: '語音生成失敗，請檢查 API 金鑰或餘額' },
-                { status: response.status }
-            );
+            const errorText = await response.text();
+            console.error('ElevenLabs Speak Error:', response.status, errorText);
+            try {
+                const errorJson = JSON.parse(errorText);
+                return NextResponse.json(
+                    { error: errorJson.detail?.message || '語音生成失敗' },
+                    { status: response.status }
+                );
+            } catch {
+                return NextResponse.json(
+                    { error: `API 錯誤 (${response.status}): ${errorText.substring(0, 100)}` },
+                    { status: response.status }
+                );
+            }
         }
 
         // Stream the audio response back to the client

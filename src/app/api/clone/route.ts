@@ -12,7 +12,14 @@ export async function POST(req: NextRequest) {
         }
 
         const apiKey = process.env.ELEVENLABS_API_KEY;
+
+        // Debugging logs
+        console.log('Clone API called');
+        console.log('API Key Presence:', !!apiKey);
+        if (apiKey) console.log('API Key Length:', apiKey.length);
+
         if (!apiKey) {
+            console.error('Missing ElevenLabs API Key in environment');
             return NextResponse.json({ error: '伺服器配置錯誤 (API Key)' }, { status: 500 });
         }
 
@@ -38,11 +45,20 @@ export async function POST(req: NextRequest) {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error('ElevenLabs Clone Error:', data);
-            return NextResponse.json(
-                { error: data.detail?.message || '克隆語音失敗' },
-                { status: response.status }
-            );
+            const errorText = await response.text();
+            console.error('ElevenLabs Clone Error:', response.status, errorText);
+            try {
+                const errorJson = JSON.parse(errorText);
+                return NextResponse.json(
+                    { error: errorJson.detail?.message || '克隆語音失敗' },
+                    { status: response.status }
+                );
+            } catch {
+                return NextResponse.json(
+                    { error: `API 錯誤 (${response.status}): ${errorText.substring(0, 100)}` },
+                    { status: response.status }
+                );
+            }
         }
 
         return NextResponse.json({
