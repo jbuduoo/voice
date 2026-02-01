@@ -315,51 +315,69 @@ export default function MyVoiceClone() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">新聲音名稱</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="例如：我的專屬男聲"
-                      className="w-full p-3 pr-10 bg-white border border-[#CBD5E1] rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 shadow-sm transition-all outline-none text-sm"
-                      value={voiceName}
-                      onChange={(e) => { setVoiceName(e.target.value); setError(null); }}
-                    />
-                    <button
-                      onClick={() => setVoiceName(generateRandomName())}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                      title="產生隨機名稱"
-                    >
-                      <RefreshCw size={16} />
-                    </button>
-                  </div>
-                </div>
+              {/* Hidden Voice Name Section - Automatic Naming */}
+              <div className="hidden">
+                <input
+                  type="text"
+                  value={voiceName}
+                  onChange={(e) => { setVoiceName(e.target.value); setError(null); }}
+                />
               </div>
 
-              <div className="flex flex-col items-center gap-4 py-2">
-                <div className="relative">
-                  {isRecording && (
-                    <div className="absolute inset-0 bg-red-400 rounded-full blur-xl animate-breathing opacity-30"></div>
-                  )}
+              <div className="flex flex-col items-center gap-6 py-4">
+                <div className="relative group">
+                  {/* Decorative Rings */}
+                  <div className={cn(
+                    "absolute -inset-4 rounded-full transition-all duration-700 blur-2xl opacity-20",
+                    isRecording ? "bg-red-500 animate-pulse" : "bg-indigo-400 group-hover:opacity-40"
+                  )}></div>
+                  <div className={cn(
+                    "absolute -inset-2 rounded-full border-2 transition-all duration-500",
+                    isRecording ? "border-red-200 animate-ping opacity-75" : "border-slate-100 group-hover:border-indigo-100"
+                  )}></div>
+
                   <button
                     onClick={isRecording ? stopRecording : startRecording}
                     className={cn(
-                      "relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 border-4",
-                      isRecording ? "bg-red-600 border-red-200 shadow-xl scale-105" : "bg-slate-50 border-slate-100 hover:border-indigo-100 hover:bg-white text-slate-400 hover:text-indigo-600 shadow-inner"
+                      "relative w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-300 border-4 shadow-xl",
+                      isRecording
+                        ? "bg-red-600 border-red-200 scale-110"
+                        : "bg-white border-white hover:border-indigo-50 text-indigo-600 hover:scale-105 active:scale-95"
                     )}
                   >
-                    {isRecording ? <Square fill="currentColor" size={24} className="text-white" /> : <Mic size={32} />}
+                    <div className={cn(
+                      "transition-all duration-300",
+                      isRecording ? "text-white" : "text-indigo-600"
+                    )}>
+                      {isRecording ? (
+                        <Square fill="currentColor" size={28} className="animate-pulse" />
+                      ) : (
+                        <Mic size={48} className="drop-shadow-sm" />
+                      )}
+                    </div>
                   </button>
                 </div>
 
-                <div className="text-center">
-                  <p className={cn("text-3xl font-mono font-bold tracking-tighter", isRecording ? "text-red-500" : "text-slate-300")}>
+                <div className="text-center space-y-2">
+                  <p className={cn(
+                    "text-4xl font-mono font-black tracking-tighter transition-colors duration-300",
+                    isRecording ? "text-red-500" : "text-slate-700"
+                  )}>
                     {formatTime(recordingTime)}
                   </p>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mt-1">
-                    {isRecording ? "正在錄製錄音檔" : "點擊圖示開始錄音"}
-                  </p>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className={cn(
+                      "text-[12px] uppercase tracking-[0.3em] font-black px-4 py-1 rounded-full border transition-all duration-300",
+                      isRecording
+                        ? "bg-red-50 border-red-100 text-red-600"
+                        : "bg-slate-50 border-slate-100 text-slate-400"
+                    )}>
+                      {isRecording ? "正在錄音中" : "點擊麥克風開始錄製"}
+                    </span>
+                    {!isRecording && !recordedUrl && (
+                      <p className="text-[10px] text-slate-400 font-medium">請在安靜的環境下說話</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
